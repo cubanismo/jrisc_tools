@@ -1,9 +1,11 @@
 #ifndef JRISC_INST_H_
 #define JRISC_INST_H_
 
+#include "jrisc_ctx.h"
+#include "jrisc_regtype.h"
+
 #include <stdint.h>
 #include <stdbool.h>
-#include "jrisc_regtype.h"
 
 enum JRISC_OpName {
 /* Define a macro to generate an instruction name enum */
@@ -84,15 +86,12 @@ struct JRISC_Instruction {
 	uint32_t longImmediate;
 };
 
+extern const struct JRISC_Instruction
+jriscInstructionTable[];
+
 extern enum JRISC_Error
 jriscInstructionRead(struct JRISC_Context *context,
 					 enum JRISC_CPU cpu,
 					 struct JRISC_Instruction *instructionOut);
-
-extern bool
-jriscRegPrint(const struct JRISC_OpReg *reg, const char *baseIndirect);
-
-extern void
-jriscInstructionPrint(const struct JRISC_Instruction *instruction);
 
 #endif /*  JRISC_INST_H_ */

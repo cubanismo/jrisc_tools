@@ -2,6 +2,7 @@
 #include "jrisc_ctx.h"
 #include "jrisc_ctx_file.h"
 #include "jrisc_inst.h"
+#include "jrisc_inst_string.h"
 
 #include <stdlib.h>
 #include <stdio.h>
