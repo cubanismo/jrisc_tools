@@ -86,8 +86,19 @@ jriscRegToString(const struct JRISC_OpReg *reg,
 		break;
 
 	case JRISC_condition:
-		// XXX Convert to mnemonic
-		ADD_STRING("$%x", reg->val.condition);
+		switch (reg->val.condition) {
+		case 0x0:	ADD_STRING("T");	/* True/Always */	break;
+		case 0x1:	ADD_STRING("NE");	/* Not  Equal */	break;
+		case 0x2:	ADD_STRING("EQ");	/* Equal */			break;
+		case 0x4:	ADD_STRING("CC");	/* Carry Clear */	break;
+		case 0x5:	ADD_STRING("HI");	/* Higher */		break;
+		case 0x8:	ADD_STRING("CS");	/* Carry Set */		break;
+		case 0x14:	ADD_STRING("PL");	/* Plus/Positive */	break;
+		case 0x18:	ADD_STRING("MI");	/* Minus/Negative */break;
+		default:
+			ADD_STRING("$%x", reg->val.condition);
+			break;
+		}
 		break;
 
 	case JRISC_immediate:
