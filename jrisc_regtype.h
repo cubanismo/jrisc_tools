@@ -6,6 +6,7 @@ enum JRISC_RegType {
 	JRISC_indirect,
 	JRISC_condition,
 	JRISC_immediate,
+	JRISC_pcoffset,
 	JRISC_flag,
 	JRISC_unused,
 };

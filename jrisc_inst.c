@@ -117,8 +117,7 @@ jriscRegFromRaw(uint8_t raw,
 	enum JRISC_Error ret = JRISC_success;
 
 	switch (type) {
-	case JRISC_indirect:
-		/* Fall through */
+	case JRISC_indirect: /* Fall through */
 	case JRISC_reg:
 		ret = jriscValidateReg(raw, &out.val.reg);
 		if (ret != JRISC_success) return ret;
@@ -129,6 +128,7 @@ jriscRegFromRaw(uint8_t raw,
 		if (ret != JRISC_success) return ret;
 		break;
 
+	case JRISC_pcoffset: /* Fall through */
 	case JRISC_immediate:
 		ret = jriscValidateImmediate(raw, &out.val.immediate);
 		if (ret != JRISC_success) return ret;

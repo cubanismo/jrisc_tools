@@ -2,6 +2,7 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <inttypes.h>
 
 static const char *jriscOpNameToStringTable[] = {
 #define JRISC_OP(opName, opNum, regSrcType, regDstType, swapRegs, cpus) #opName,
@@ -96,6 +97,11 @@ jriscRegToString(const struct JRISC_OpReg *reg,
 		} else {
 			ADD_STRING("#$%x", reg->val.immediate);
 		}
+		break;
+
+	case JRISC_pcoffset:
+		// XXX Not really correct without signed immediate values.
+		ADD_STRING("(pc+%" PRId8 ")", reg->val.immediate);
 		break;
 
 	case JRISC_flag:
