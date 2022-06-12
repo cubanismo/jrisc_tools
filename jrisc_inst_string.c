@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <inttypes.h>
+#include <assert.h>
 
 static const char *jriscOpNameToStringTable[] = {
 #define JRISC_OP(opName, opNum, regSrcType, regDstType, swapRegs, cpus) #opName,
@@ -61,6 +62,12 @@ static const char *jriscOpNameToString(enum JRISC_OpName opName)
 		outLength += tmpLength;											\
 	} while (0)
 
+static inline uint8_t
+jriscRegUnsignedValue(const struct JRISC_OpReg *reg)
+{
+	return reg->val.uimmediate ? reg->val.uimmediate : 32;
+}
+
 /* Returns true if the register field is something visible */
 static bool
 jriscRegToString(const struct JRISC_OpReg *reg,
@@ -82,10 +89,12 @@ jriscRegToString(const struct JRISC_OpReg *reg,
 		break;
 
 	case JRISC_indirect:
+		assert(!baseIndirect);
 		ADD_STRING("(r%d)", reg->val.reg);
 		break;
 
 	case JRISC_condition:
+		assert(!baseIndirect);
 		switch (reg->val.condition) {
 		case 0x0:	ADD_STRING("T");	/* True/Always */	break;
 		case 0x1:	ADD_STRING("NE");	/* Not  Equal */	break;
@@ -101,24 +110,40 @@ jriscRegToString(const struct JRISC_OpReg *reg,
 		}
 		break;
 
-	case JRISC_immediate:
-		// XXX Handle signed/unsigned immediates separately
+	case JRISC_uimmediate:
 		if (baseIndirect) {
-			ADD_STRING("(%s+$%x)", baseIndirect, reg->val.immediate);
+			ADD_STRING("(%s+%" PRIu8 ")", baseIndirect,
+					   jriscRegUnsignedValue(reg));
 		} else {
-			ADD_STRING("#$%x", reg->val.immediate);
+			ADD_STRING("#%" PRIu8, jriscRegUnsignedValue(reg));
 		}
 		break;
 
+	case JRISC_zuimmediate:
+		assert(!baseIndirect);
+		ADD_STRING("#%" PRIu8, reg->val.uimmediate);
+		break;
+
+	case JRISC_shlimmediate:
+		assert(!baseIndirect);
+		ADD_STRING("#%" PRIu8, 32 - jriscRegUnsignedValue(reg));
+		break;
+
+	case JRISC_simmediate:
+		assert(!baseIndirect);
+		ADD_STRING("#%" PRId8, reg->val.simmediate);
+		break;
+
 	case JRISC_pcoffset:
-		// XXX Not really correct without signed immediate values.
-		ADD_STRING("(pc+%" PRId8 ")", reg->val.immediate);
+		assert(!baseIndirect);
+		ADD_STRING("*%+" PRId8, (reg->val.simmediate + 1) * 2);
 		break;
 
 	case JRISC_flag:
 		// fall through
 	case JRISC_unused:
 		// Nothing to do.
+		assert(!baseIndirect);
 		visible = false;
 		break;
 	}

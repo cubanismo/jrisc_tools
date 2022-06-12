@@ -86,7 +86,6 @@ jriscValidateCondition(uint8_t raw, uint8_t *conditionOut)
 static enum JRISC_Error
 jriscValidateImmediate(uint8_t raw, uint8_t *immediateOut)
 {
-	/* XXX Handle signed/unsigned immediates separately */
 	if (raw & ~JRISC_REG_MASK) {
 		return JRISC_ERROR_invalidValue;
 	}
@@ -128,10 +127,18 @@ jriscRegFromRaw(uint8_t raw,
 		if (ret != JRISC_success) return ret;
 		break;
 
-	case JRISC_pcoffset: /* Fall through */
-	case JRISC_immediate:
-		ret = jriscValidateImmediate(raw, &out.val.immediate);
+	case JRISC_pcoffset:		/* Fall through */
+	case JRISC_simmediate:		/* Fall through */
+	case JRISC_shlimmediate:	/* Fall through */
+	case JRISC_uimmediate:		/* Fall through */
+	case JRISC_zuimmediate:		/* Fall through*/
+		ret = jriscValidateImmediate(raw, &out.val.uimmediate);
 		if (ret != JRISC_success) return ret;
+
+		if (((type == JRISC_pcoffset) || (type == JRISC_simmediate)) &&
+			(out.val.uimmediate & 0x10)) {
+			out.val.simmediate = out.val.simmediate | 0xe0;
+		}
 		break;
 
 	case JRISC_flag:

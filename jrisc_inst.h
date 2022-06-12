@@ -68,8 +68,8 @@ struct JRISC_OpReg {
 	union {
 		enum JRISC_Reg reg;
 		uint8_t condition;
-		/* XXX Handle signed/unsigned immediates separately  */
-		uint8_t immediate;
+		uint8_t uimmediate;
+		int8_t simmediate;
 		bool flag;
 	} val;
 };
