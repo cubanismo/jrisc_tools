@@ -1,3 +1,9 @@
+/*
+ * SPDX-License-Identifier: CC0-1.0
+ *
+ * Author: James Jones
+ */
+
 #include "jrisc_base.h"
 #include "jrisc_ctx.h"
 #include "jrisc_inst.h"

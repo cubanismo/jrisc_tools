@@ -1,4 +1,10 @@
 /*
+ * SPDX-License-Identifier: CC0-1.0
+ *
+ * Author: James Jones
+ */
+
+/*
  * Jaguar RISC library error codes
  *
  * To use this file, define a macro named as such:

@@ -1,3 +1,9 @@
+/*
+ * SPDX-License-Identifier: CC0-1.0
+ *
+ * Author: James Jones
+ */
+
 #ifndef JRISC_CONTEXT_MEM_H_
 #define JRISC_CONTEXT_MEM_H_
 

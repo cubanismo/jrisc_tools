@@ -1,3 +1,9 @@
+/*
+ * SPDX-License-Identifier: CC0-1.0
+ *
+ * Author: James Jones
+ */
+
 #ifndef JRISC_INST_STRING_H_
 #define JRISC_INST_STRING_H_
 

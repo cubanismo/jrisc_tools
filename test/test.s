@@ -1,3 +1,7 @@
+; SPDX-License-Identifier: CC0-1.0
+;
+; Author: James Jones
+
 .org $4000
 .text
 .gpu
