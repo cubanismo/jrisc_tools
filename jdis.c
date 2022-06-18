@@ -100,5 +100,7 @@ main(int argc, char *argv[])
 	while ((err = jriscInstructionRead(ctx, cpu, &inst)) == JRISC_success)
 		jriscInstructionPrint(&inst);
 
+	jriscContextDestroy(ctx);
+
 	return 0;
 }

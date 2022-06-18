@@ -12,8 +12,10 @@
 #include <stddef.h>
 
 extern enum JRISC_Error
-jriscContextFromMemory(void *memory,
-					   size_t memorySize,
+jriscContextFromMemory(const void *readMemory,
+					   size_t readSize,
+					   void *writeMemory,
+					   size_t writeSize,
 					   struct JRISC_Context **contextOut);
 
 #endif /* JRISC_CONTEXT_MEM_H_ */

@@ -11,23 +11,22 @@
 
 #include <stdint.h>
 
-typedef enum JRISC_Error (*JRISC_ReadFunc)(void *data,
-										   void *userData,
+typedef enum JRISC_Error (*JRISC_ReadFunc)(void *userData,
 										   uint64_t location,
 										   uint64_t size,
 										   void *dst);
 
-typedef enum JRISC_Error (*JRISC_WriteFunc)(void *data,
-											void *userData,
+typedef enum JRISC_Error (*JRISC_WriteFunc)(void *userData,
 											uint64_t location,
 											uint64_t size,
 											const void *src);
 
+typedef void (*JRISC_DestructorFunc)(void *userData);
+
 struct JRISC_Context {
 	JRISC_ReadFunc readFunc;
-	void *readData;
 	JRISC_WriteFunc writeFunc;
-	void *writeData;
+	JRISC_DestructorFunc userDestructor;
 	void *userData;
 	uint64_t location;
 
@@ -41,10 +40,12 @@ struct JRISC_Context {
 
 extern enum JRISC_Error
 jriscContextCreate(JRISC_ReadFunc readfunc,
-				   void *readData,
 				   JRISC_WriteFunc writefunc,
-				   void *writeData,
+				   JRISC_DestructorFunc userDestructor,
 				   void *userData,
 				   struct JRISC_Context **contextOut);
+
+extern void
+jriscContextDestroy(struct JRISC_Context *context);
 
 #endif /* JRISC_CTX_H_ */

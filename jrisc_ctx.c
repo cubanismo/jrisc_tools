@@ -12,8 +12,7 @@
 static enum JRISC_Error
 jriscContextRead(struct JRISC_Context *context, uint64_t size, void *dst)
 {
-	enum JRISC_Error ret = context->readFunc(context->readData,
-											 context->userData,
+	enum JRISC_Error ret = context->readFunc(context->userData,
 											 context->location,
 											 size,
 											 dst);
@@ -26,8 +25,7 @@ jriscContextRead(struct JRISC_Context *context, uint64_t size, void *dst)
 static enum JRISC_Error
 jriscContextWrite(struct JRISC_Context *context, uint64_t size, const void *src)
 {
-	enum JRISC_Error ret = context->writeFunc(context->writeData,
-											  context->userData,
+	enum JRISC_Error ret = context->writeFunc(context->userData,
 											  context->location,
 											  size,
 											  src);
@@ -39,9 +37,8 @@ jriscContextWrite(struct JRISC_Context *context, uint64_t size, const void *src)
 
 enum JRISC_Error
 jriscContextCreate(JRISC_ReadFunc readFunc,
-				   void *readData,
 				   JRISC_WriteFunc writeFunc,
-				   void *writeData,
+				   JRISC_DestructorFunc userDestructor,
 				   void *userData,
 				   struct JRISC_Context **contextOut)
 {
@@ -53,9 +50,8 @@ jriscContextCreate(JRISC_ReadFunc readFunc,
 	}
 
 	ctx->readFunc = readFunc;
-	ctx->readData = readData;
 	ctx->writeFunc = writeFunc;
-	ctx->writeData = writeData;
+	ctx->userDestructor = userDestructor;
 	ctx->userData = userData;
 	ctx->location = 0;
 	ctx->read = jriscContextRead;
@@ -64,4 +60,12 @@ jriscContextCreate(JRISC_ReadFunc readFunc,
 	*contextOut = ctx;
 
 	return JRISC_success;
+}
+
+void
+jriscContextDestroy(struct JRISC_Context *context)
+{
+	if (context->userDestructor) context->userDestructor(context->userData);
+
+	free(context);
 }

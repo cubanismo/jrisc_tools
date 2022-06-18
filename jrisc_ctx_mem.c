@@ -8,51 +8,78 @@
 #include "jrisc_ctx.h"
 #include "jrisc_ctx_mem.h"
 
-#include  <string.h>
+#include <stdlib.h>
+#include <string.h>
+
+struct MemoryContext {
+	const uint8_t *memoryRead;
+	size_t sizeRead;
+	uint8_t *memoryWrite;
+	size_t sizeWrite;
+};
 
 static enum JRISC_Error
-jriscMemoryRead(void *data,
-				void *userData,
+jriscMemoryRead(void *userData,
 				uint64_t location,
 				uint64_t size,
 				void *dst)
 {
-	uint64_t memorySize = (uint64_t)userData;
-	const uint8_t *data8 = data;
+	struct MemoryContext *mCtx = (struct MemoryContext *)userData;
 
-	if ((location + size) > memorySize) return JRISC_ERROR_ioError;
+	if (!mCtx->memoryRead) return JRISC_ERROR_ioError;
+	if ((location + size) > mCtx->sizeRead) return JRISC_ERROR_ioError;
 
-	memcpy(dst, &data8[location], size);
+	memcpy(dst, &mCtx->memoryRead[location], size);
 
 	return JRISC_success;
 }
 
 static enum JRISC_Error
-jriscMemoryWrite(void *data,
-				 void *userData,
+jriscMemoryWrite(void *userData,
 				 uint64_t location,
 				 uint64_t size,
 				 const void *src)
 {
-	uint64_t memorySize = (uint64_t)userData;
-	uint8_t *data8 = data;
+	struct MemoryContext *mCtx = (struct MemoryContext *)userData;
 
-	if ((location + size) > memorySize) return JRISC_ERROR_ioError;
+	if (!mCtx->memoryWrite) return JRISC_ERROR_ioError;
+	if ((location + size) > mCtx->sizeWrite) return JRISC_ERROR_ioError;
 
-	memcpy(&data8[location], src, size);
+	memcpy(&mCtx->memoryWrite[location], src, size);
 
 	return JRISC_success;
 }
 
+static void
+jriscDestroyMemory(void *userData)
+{
+	free(userData);
+}
+
 enum JRISC_Error
-jriscContextFromMemory(void *memory,
-					   size_t memorySize,
+jriscContextFromMemory(const void *memoryRead,
+					   size_t sizeRead,
+					   void *memoryWrite,
+					   size_t sizeWrite,
 					   struct JRISC_Context **contextOut)
 {
-	return jriscContextCreate(jriscMemoryRead,
-							  memory,
-							  jriscMemoryWrite,
-							  memory,
-							  (void *)memorySize,
-							  contextOut);
+	struct MemoryContext *mCtx = calloc(1, sizeof(*mCtx));
+	enum JRISC_Error ret;
+
+	if (!mCtx) return JRISC_ERROR_outOfMemory;
+
+	mCtx->memoryRead = memoryRead;
+	mCtx->sizeRead = sizeRead;
+	mCtx->memoryWrite = memoryWrite;
+	mCtx->sizeWrite = sizeWrite;
+
+	ret = jriscContextCreate(jriscMemoryRead,
+							 jriscMemoryWrite,
+							 jriscDestroyMemory,
+							 mCtx,
+							 contextOut);
+
+	if (JRISC_success != ret) jriscDestroyMemory(mCtx);
+
+	return ret;
 }
