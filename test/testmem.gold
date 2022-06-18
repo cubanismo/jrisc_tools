@@ -1,0 +1,10 @@
+	movei	#$5bc, r31
+	store	r0, (r31)
+	addq	#4, r31
+	load	(r31), r0
+	movei	#$f02114, r31
+	moveq	#0, r30
+	store	r30, (r31)
+	jr	T, *-2
+	nop	
+	nop	

@@ -1,4 +1,6 @@
 /jdis
+/test/testmem
+/test/testmem.pass
 *.o
 *.a
 *~
