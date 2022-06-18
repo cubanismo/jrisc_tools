@@ -16,6 +16,7 @@ jriscContextFromMemory(const void *readMemory,
 					   size_t readSize,
 					   void *writeMemory,
 					   size_t writeSize,
+					   uint32_t baseAddress,
 					   struct JRISC_Context **contextOut);
 
 #endif /* JRISC_CONTEXT_MEM_H_ */

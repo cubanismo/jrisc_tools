@@ -28,7 +28,7 @@ main(int argc, char *argv[])
 	struct JRISC_Context *ctx;
 	struct JRISC_Instruction inst;
 
-	if (jriscContextFromMemory(mem, len, NULL, 0, &ctx) != JRISC_success) {
+	if (jriscContextFromMemory(mem, len, NULL, 0, 0, &ctx) != JRISC_success) {
 		/* Throw some exception */
 		printf("Failed to create context\n");
 		return 1;

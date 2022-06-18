@@ -28,14 +28,20 @@ struct JRISC_Context {
 	JRISC_WriteFunc writeFunc;
 	JRISC_DestructorFunc userDestructor;
 	void *userData;
-	uint64_t location;
+
+	uint64_t readLocation;
+	uint32_t readAddress;
+	uint64_t writeLocation;
+	uint32_t writeAddress;
 
 	enum JRISC_Error (*read)(struct JRISC_Context *context,
 							 uint64_t size,
-							 void *dst);
+							 void *dst,
+							 uint32_t *address);
 	enum JRISC_Error (*write)(struct JRISC_Context *context,
 							  uint64_t size,
-							  const void *src);
+							  const void *src,
+							  uint32_t *address);
 };
 
 extern enum JRISC_Error
@@ -43,6 +49,7 @@ jriscContextCreate(JRISC_ReadFunc readfunc,
 				   JRISC_WriteFunc writefunc,
 				   JRISC_DestructorFunc userDestructor,
 				   void *userData,
+				   uint32_t baseAddress,
 				   struct JRISC_Context **contextOut);
 
 extern void

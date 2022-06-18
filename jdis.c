@@ -10,8 +10,10 @@
 #include "jrisc_inst.h"
 #include "jrisc_inst_string.h"
 
+#include <stdbool.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <errno.h>
 
 static void
 version(void)
@@ -25,13 +27,18 @@ usage(void)
 {
 	version();
 	printf("\n");
-	printf("Usage: jdis [-gdhv] <JRISC machine code file>\n");
+	printf("Usage: jdis [-gdhv] [-o <offset>] [-b <base address>] <JRISC machine code file>\n");
 	printf("\n");
 	printf("Options:\n");
 	printf("  -g: Parse code as Tom/GPU instructions [default].\n");
 	printf("  -d: Parse code as Jerry/DSP instructions.\n");
+	printf("  -o <offset>: Specify offset into file (0x<hex> or <decimal>)\n");
+	printf("  -b <base address>: Specify the base load address of the code\n");
 	printf("  -h: Help. Print this text.\n");
 	printf("  -v: Version. Print the version and exit.\n");
+	printf("\n");
+	printf("Offsets and addresses are parsed as hex if they start '0x',\n");
+	printf("  octal if they start with '0', or decimal otherwise.\n");
 }
 
 int
@@ -43,12 +50,16 @@ main(int argc, char *argv[])
 	enum JRISC_Error err;
 	const char *fileName = NULL;
 	enum JRISC_CPU cpu = JRISC_gpu;
+	uint64_t fileOffset = 0;
+	uint32_t baseAddress = 0;
 	int i;
 	int j;
+	bool skipParam;
+	char *end;
 
 	for (i = 1; i < argc; i++) {
 		if (argv[i][0] == '-') {
-			for (j = 1; argv[i][j]; j++) {
+			for (j = 1, skipParam = false; !skipParam && argv[i][j]; j++) {
 				switch (argv[i][j]) {
 				case 'h':
 					usage();
@@ -64,6 +75,48 @@ main(int argc, char *argv[])
 
 				case 'd':
 					cpu = JRISC_dsp;
+					break;
+
+				case 'o':
+					if ((argv[i][j+1]) || (++i >= argc)) {
+						usage();
+						exit(1);
+					}
+					errno = 0;
+					fileOffset = strtoll(argv[i], &end, 0);
+					if (errno != 0) {
+						perror("Error parsing file offset");
+						printf("\n");
+						usage();
+						exit(1);
+					}
+					if (!argv[i][0] || end[0]) {
+						printf("Error parsing file offset\n\n");
+						usage();
+						exit(1);
+					}
+					skipParam = true;
+					break;
+
+				case 'b':
+					if ((argv[i][j+1]) || (++i >= argc)) {
+						usage();
+						exit(1);
+					}
+					errno = 0;
+					baseAddress = strtol(argv[i], &end, 0);
+					if (errno != 0) {
+						perror("Error parsing base address");
+						printf("\n");
+						usage();
+						exit(1);
+					}
+					if (!argv[i][0] || end[0]) {
+						printf("Error parsing base address\n\n");
+						usage();
+						exit(1);
+					}
+					skipParam = true;
 					break;
 
 				default:
@@ -91,7 +144,11 @@ main(int argc, char *argv[])
 		exit(1);
 	}
 
-	err = jriscContextFromFile(fp, fp, &ctx);
+	err = jriscContextFromFile(fp, fileOffset,		/* read file */
+							   NULL, 0,				/* write file+offset */
+							   baseAddress,
+							   &ctx);
+
 	if (err != JRISC_success) {
 		fprintf(stderr, "Failed to create context\n");
 		exit(1);

@@ -13,7 +13,10 @@
 
 extern enum JRISC_Error
 jriscContextFromFile(FILE *fpRead,
+					 uint64_t readOffset,
 					 FILE *fpWrite,
+					 uint64_t writeOffset,
+					 uint32_t baseAddress,
 					 struct JRISC_Context **contextOut);
 
 #endif /* JRISC_CONTEXT_FILE_H_ */

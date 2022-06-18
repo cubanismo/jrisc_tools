@@ -10,27 +10,41 @@
 #include <stdlib.h>
 
 static enum JRISC_Error
-jriscContextRead(struct JRISC_Context *context, uint64_t size, void *dst)
+jriscContextRead(struct JRISC_Context *context,
+				 uint64_t size,
+				 void *dst,
+				 uint32_t *address)
 {
 	enum JRISC_Error ret = context->readFunc(context->userData,
-											 context->location,
+											 context->readLocation,
 											 size,
 											 dst);
 
-	if (JRISC_success == ret) context->location += size;
+	if (JRISC_success == ret) {
+		if (address) *address = context->readAddress;
+		context->readLocation += size;
+		context->readAddress += size;
+	}
 
 	return ret;
 }
 
 static enum JRISC_Error
-jriscContextWrite(struct JRISC_Context *context, uint64_t size, const void *src)
+jriscContextWrite(struct JRISC_Context *context,
+				  uint64_t size,
+				  const void *src,
+				  uint32_t *address)
 {
 	enum JRISC_Error ret = context->writeFunc(context->userData,
-											  context->location,
+											  context->writeLocation,
 											  size,
 											  src);
 
-	if (JRISC_success == ret) context->location += size;
+	if (JRISC_success == ret) {
+		if (address) *address = context->writeAddress;
+		context->writeLocation += size;
+		context->writeAddress += size;
+	}
 
 	return ret;
 }
@@ -40,6 +54,7 @@ jriscContextCreate(JRISC_ReadFunc readFunc,
 				   JRISC_WriteFunc writeFunc,
 				   JRISC_DestructorFunc userDestructor,
 				   void *userData,
+				   uint32_t baseAddress,
 				   struct JRISC_Context **contextOut)
 {
 	struct JRISC_Context *ctx = calloc(1, sizeof(*ctx));
@@ -53,7 +68,10 @@ jriscContextCreate(JRISC_ReadFunc readFunc,
 	ctx->writeFunc = writeFunc;
 	ctx->userDestructor = userDestructor;
 	ctx->userData = userData;
-	ctx->location = 0;
+	ctx->readLocation = 0;
+	ctx->writeLocation = 0;
+	ctx->readAddress = baseAddress;
+	ctx->writeAddress = baseAddress;
 	ctx->read = jriscContextRead;
 	ctx->write = jriscContextWrite;
 

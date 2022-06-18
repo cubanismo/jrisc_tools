@@ -61,6 +61,7 @@ jriscContextFromMemory(const void *memoryRead,
 					   size_t sizeRead,
 					   void *memoryWrite,
 					   size_t sizeWrite,
+					   uint32_t baseAddress,
 					   struct JRISC_Context **contextOut)
 {
 	struct MemoryContext *mCtx = calloc(1, sizeof(*mCtx));
@@ -77,6 +78,7 @@ jriscContextFromMemory(const void *memoryRead,
 							 jriscMemoryWrite,
 							 jriscDestroyMemory,
 							 mCtx,
+							 baseAddress,
 							 contextOut);
 
 	if (JRISC_success != ret) jriscDestroyMemory(mCtx);

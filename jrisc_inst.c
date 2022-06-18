@@ -184,13 +184,14 @@ jriscInstructionRead(struct JRISC_Context *context,
 	const struct JRISC_Instruction *match = NULL;
 	struct JRISC_Instruction out;
 	enum JRISC_Error ret;
+	uint32_t address;
 	uint16_t rawImmediate;
 	uint16_t raw;
 	uint8_t rawCode;
 	uint8_t rawSrc;
 	uint8_t rawDst;
 
-	ret = context->read(context, sizeof(raw), &raw);
+	ret = context->read(context, sizeof(raw), &raw, &address);
 	if (ret != JRISC_success) return ret;
 
 	/* XXX swap at appropriate times */
@@ -214,6 +215,7 @@ jriscInstructionRead(struct JRISC_Context *context,
 	if (!match) return JRISC_ERROR_invalidOpCode;
 
 	out = *match;
+	out.address = address;
 
 	ret = jriscRegFromRaw(rawSrc, match->regSrc.type, &out.regSrc);
 	if (ret != JRISC_success) return ret;
@@ -226,7 +228,7 @@ jriscInstructionRead(struct JRISC_Context *context,
 	 * "instruction" slots.
 	 */
 	if (out.opName == JRISC_op_movei) {
-		ret = context->read(context, sizeof(rawImmediate), &rawImmediate);
+		ret = context->read(context, sizeof(rawImmediate), &rawImmediate, NULL);
 		if (ret != JRISC_success) return ret;
 
 		/* XXX swap at appropriate times */
@@ -234,7 +236,7 @@ jriscInstructionRead(struct JRISC_Context *context,
 
 		out.longImmediate = rawImmediate;
 
-		ret = context->read(context, sizeof(rawImmediate), &rawImmediate);
+		ret = context->read(context, sizeof(rawImmediate), &rawImmediate, NULL);
 		if (ret != JRISC_success) return ret;
 
 		/* XXX swap at appropriate times */

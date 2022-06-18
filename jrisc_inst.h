@@ -89,6 +89,8 @@ struct JRISC_Instruction {
 
 	enum JRISC_CPU cpu;
 
+	/* Non-templated members */
+	uint32_t address;
 	uint32_t longImmediate;
 };
 
