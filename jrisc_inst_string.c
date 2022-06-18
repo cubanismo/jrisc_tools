@@ -154,7 +154,7 @@ jriscRegToString(const struct JRISC_OpReg *reg,
 		break;
 	}
 
-	*stringLengthInOut = outLength;
+	*stringLengthInOut = outLength + 1 /* For '/0' */;
 
 	return visible;
 }
@@ -191,7 +191,9 @@ jriscInstructionToString(const struct JRISC_Instruction *instruction,
 									  reg1BaseIndirect,
 									  string,
 									  &localLength);
+		localLength -= 1 /* For '\0' */;
 		string += localLength;
+		outLength += localLength;
 		if (localLength > stringLength) stringLength = 0;
 		else stringLength -= localLength;
 	}
@@ -201,9 +203,13 @@ jriscInstructionToString(const struct JRISC_Instruction *instruction,
 
 	localLength = stringLength;
 	jriscRegToString(reg2, reg2BaseIndirect, string, &localLength);
+	localLength -= 1 /* For '\0' */;
 	string += localLength;
+	outLength += localLength;
 	if (localLength > stringLength) stringLength = 0;
 	else stringLength -= localLength;
+
+	*stringLengthInOut = outLength + 1 /* For '\0' */;
 }
 
 enum JRISC_Error
