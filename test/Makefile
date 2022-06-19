@@ -13,7 +13,7 @@ all: testjdis testmem.pass
 testjdis: test.bin
 	awk '/\t/' test.s > test.raw.s
 	../jdis test.bin > test.disassembled.s
-	diff -u test.raw.s test.disassembled.s
+	diff --strip-trailing-cr -u test.raw.s test.disassembled.s
 	rm test.raw.s test.disassembled.s
 
 test.bin:	test.s
@@ -21,7 +21,7 @@ test.bin:	test.s
 
 testmem.pass: testmem testmem.gold
 	./testmem > testmem.out
-	diff testmem.out testmem.gold
+	diff --strip-trailing-cr testmem.out testmem.gold
 	test $$? -eq 0 && rm testmem.out && touch testmem.pass
 
 LOCAL_OBJECTS = testmem.o
