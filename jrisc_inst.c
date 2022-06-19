@@ -9,6 +9,7 @@
 #include "jrisc_inst.h"
 
 #include <stddef.h>
+#include <assert.h>
 
 const struct JRISC_Instruction
 jriscInstructionTable[] = {
@@ -165,6 +166,38 @@ jriscRegFromRaw(uint8_t raw,
 	return ret;
 }
 
+uint8_t
+jriscRegToRaw(const struct JRISC_OpReg *reg)
+{
+	switch (reg->type) {
+	case JRISC_indirect: /* Fall through */
+	case JRISC_reg:
+		return (uint8_t)reg->val.reg;
+
+	case JRISC_condition:
+		return reg->val.condition;
+
+	case JRISC_shlimmediate:	/* Fall through */
+	case JRISC_uimmediate:		/* Fall through */
+	case JRISC_zuimmediate:
+		return reg->val.uimmediate;
+
+	case JRISC_pcoffset:		/* Fall through */
+	case JRISC_simmediate:
+		return (uint8_t)(reg->val.simmediate & JRISC_REG_MASK);
+
+	case JRISC_flag:
+		return reg->val.flag ? 1 : 0;
+
+	case JRISC_unused:
+		return 0;
+
+	default:
+		assert(!"Unreachable!");
+		return 0;
+	}
+}
+
 static const struct JRISC_Instruction *
 jriscNextInstruction(const struct JRISC_Instruction *current)
 {
@@ -197,7 +230,7 @@ jriscInstructionRead(struct JRISC_Context *context,
 	/* XXX swap at appropriate times */
 	raw = (raw << 8) | (raw >> 8);
 
-	rawCode = raw >> JRISC_RAWCODE_SHIFT;
+	rawCode = raw >> JRISC_OPCODE_SHIFT;
 	rawSrc = (raw >> JRISC_REGSRC_SHIFT) & JRISC_REG_MASK;
 	rawDst = raw & JRISC_REG_MASK;
 
@@ -248,4 +281,16 @@ jriscInstructionRead(struct JRISC_Context *context,
 	*instructionOut = out;
 
 	return ret;
+}
+
+uint16_t
+jriscInstructionLongImmediateLow(const struct JRISC_Instruction *instruction)
+{
+	return instruction->longImmediate & 0xffff;
+}
+
+uint16_t
+jriscInstructionLongImmediateHigh(const struct JRISC_Instruction *instruction)
+{
+	return instruction->longImmediate >> 16;
 }

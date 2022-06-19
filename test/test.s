@@ -9,11 +9,11 @@
 label:
 ; Jump to label:
 	jr	T, *+0
-	nop	
+	nop
 	jr	T, *+4
-	nop	
+	nop
 	jump	T, (r2)
-	nop	
+	nop
 	add	r1, r2
 	addq	#5, r2
 	abs	r3

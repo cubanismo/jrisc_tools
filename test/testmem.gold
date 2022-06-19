@@ -1,10 +1,14 @@
-	movei	#$5bc, r31
-	store	r0, (r31)
-	addq	#4, r31
-	load	(r31), r0
-	movei	#$f02114, r31
-	moveq	#0, r30
-	store	r30, (r31)
-	jr	T, *-2
-	nop	
-	nop	
+00000000: 98 1f	movei	#$5bc, r31
+00000002: 05 bc
+00000004: 00 00
+00000006: bf e0	store	r0, (r31)
+00000008: 08 9f	addq	#4, r31
+0000000a: a7 e0	load	(r31), r0
+0000000c: 98 1f	movei	#$f02114, r31
+0000000e: 21 14
+00000010: 00 f0
+00000012: 8c 1e	moveq	#0, r30
+00000014: bf fe	store	r30, (r31)
+00000016: d7 c0	jr	T, *-2
+00000018: e4 00	nop
+0000001a: e4 00	nop

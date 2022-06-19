@@ -27,11 +27,13 @@ usage(void)
 {
 	version();
 	printf("\n");
-	printf("Usage: jdis [-gdhv] [-o <offset>] [-b <base address>] <JRISC machine code file>\n");
+	printf("Usage: jdis [-gdamhv] [-o <offset>] [-b <base address>] <JRISC machine code file>\n");
 	printf("\n");
 	printf("Options:\n");
 	printf("  -g: Parse code as Tom/GPU instructions [default].\n");
 	printf("  -d: Parse code as Jerry/DSP instructions.\n");
+	printf("  -a: Print address in hex of each disassembled word.\n");
+	printf("  -m: Print machine code in hex of each disassembled word.\n");
 	printf("  -o <offset>: Specify offset into file (0x<hex> or <decimal>)\n");
 	printf("  -b <base address>: Specify the base load address of the code\n");
 	printf("  -h: Help. Print this text.\n");
@@ -52,6 +54,7 @@ main(int argc, char *argv[])
 	enum JRISC_CPU cpu = JRISC_gpu;
 	uint64_t fileOffset = 0;
 	uint32_t baseAddress = 0;
+	uint32_t stringFlags = 0;
 	int i;
 	int j;
 	bool skipParam;
@@ -75,6 +78,14 @@ main(int argc, char *argv[])
 
 				case 'd':
 					cpu = JRISC_dsp;
+					break;
+
+				case 'a':
+					stringFlags |= JRISC_STRINGFLAG_ADDRESS;
+					break;
+
+				case 'm':
+					stringFlags |= JRISC_STRINGFLAG_MACHINE_CODE;
 					break;
 
 				case 'o':
@@ -155,7 +166,7 @@ main(int argc, char *argv[])
 	}
 
 	while ((err = jriscInstructionRead(ctx, cpu, &inst)) == JRISC_success)
-		jriscInstructionPrint(&inst);
+		jriscInstructionPrint(&inst, stringFlags);
 
 	jriscContextDestroy(ctx);
 

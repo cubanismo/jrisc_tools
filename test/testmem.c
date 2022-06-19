@@ -35,7 +35,9 @@ main(int argc, char *argv[])
 	}
 
 	while (jriscInstructionRead(ctx, JRISC_gpu, &inst) == JRISC_success) {
-		jriscInstructionPrint(&inst);
+		jriscInstructionPrint(&inst,
+							  JRISC_STRINGFLAG_ADDRESS |
+							  JRISC_STRINGFLAG_MACHINE_CODE);
 	}
 
 error:

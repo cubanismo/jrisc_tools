@@ -64,7 +64,7 @@ enum JRISC_Reg {
 	r31
 };
 
-#define JRISC_RAWCODE_SHIFT (10)
+#define JRISC_OPCODE_SHIFT (10)
 #define JRISC_REGSRC_SHIFT (5)
 #define JRISC_REG_MASK (0x1f)
 
@@ -97,9 +97,18 @@ struct JRISC_Instruction {
 extern const struct JRISC_Instruction
 jriscInstructionTable[];
 
+extern uint8_t
+jriscRegToRaw(const struct JRISC_OpReg *reg);
+
 extern enum JRISC_Error
 jriscInstructionRead(struct JRISC_Context *context,
 					 enum JRISC_CPU cpu,
 					 struct JRISC_Instruction *instructionOut);
+
+extern uint16_t
+jriscInstructionLongImmediateLow(const struct JRISC_Instruction *instruction);
+
+extern uint16_t
+jriscInstructionLongImmediateHigh(const struct JRISC_Instruction *instruction);
 
 #endif /*  JRISC_INST_H_ */
