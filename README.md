@@ -13,8 +13,10 @@ On a POSIX system with a C compiler and GNU make installed:
 
     $ make
 
-You're on your own in Windows or other operating systems for now, but patches
-for Visual Studio or Xcode support are welcome.
+On Windows, you can use MSYS/MinGW to build with make, or use the Visual Studio
+solution files in the vs2022 directory. Note they can also be used with earlier
+versions of Visual Studio by adjusting the "Platform Toolset" of each project in
+the "Project Settings" menu's "Configuration Properties-\>General" tab.
 
 JDIS Usage
 ----------
