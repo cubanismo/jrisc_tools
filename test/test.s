@@ -8,11 +8,11 @@
 .org $f10000
 label:
 ; Jump to label:
-	jr      T, *+0
+	jr      *+0
 	nop
-	jr      T, *+4
+	jr      NE, *+4
 	nop
-	jump    T, (r2)
+	jump    PL, (r2)
 	nop
 	add     r1, r2
 	addq    #5, r2

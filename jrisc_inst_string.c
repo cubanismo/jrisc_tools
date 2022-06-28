@@ -102,7 +102,7 @@ jriscRegToString(const struct JRISC_OpReg *reg,
 	case JRISC_condition:
 		assert(!baseIndirect);
 		switch (reg->val.condition) {
-		case 0x0:	ADD_STRING("T");	/* True/Always */	break;
+		case 0x0:	visible = false;	/* True/Always */	break;
 		case 0x1:	ADD_STRING("NE");	/* Not  Equal */	break;
 		case 0x2:	ADD_STRING("EQ");	/* Equal */			break;
 		case 0x4:	ADD_STRING("CC");	/* Carry Clear */	break;
