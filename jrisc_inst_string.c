@@ -79,7 +79,9 @@ static bool
 jriscRegToString(const struct JRISC_OpReg *reg,
 				 const char *baseIndirect,
 				 char *string,
-				 size_t *stringLengthInOut)
+                 size_t *stringLengthInOut,
+                 uint32_t flags,
+                 uint32_t address)
 {
 	size_t stringLength = string ? *stringLengthInOut : 0;
 	int outLength = 0;
@@ -142,7 +144,11 @@ jriscRegToString(const struct JRISC_OpReg *reg,
 
 	case JRISC_pcoffset:
 		assert(!baseIndirect);
+    if (flags & JRISC_STRINGFLAG_ADDRESS) {
+      ADD_STRING("$%x",(reg->val.simmediate + 1) * 2 + address);
+    } else {
 		ADD_STRING("*%+" PRId8, (reg->val.simmediate + 1) * 2);
+    }
 		break;
 
 	case JRISC_flag:
@@ -228,7 +234,9 @@ jriscInstructionToString(const struct JRISC_Instruction *instruction,
 		regVisible = jriscRegToString(reg1,
 									  reg1BaseIndirect,
 									  string,
-									  &localLength);
+                                  &localLength,
+                                  flags,
+                                  instruction->address);
 		localLength -= 1 /* For '\0' */;
 		string += localLength;
 		outLength += localLength;
@@ -239,7 +247,7 @@ jriscInstructionToString(const struct JRISC_Instruction *instruction,
 	if (regVisible) ADD_STRING(", ");
 
 	localLength = stringLength;
-	jriscRegToString(reg2, reg2BaseIndirect, string, &localLength);
+  jriscRegToString(reg2, reg2BaseIndirect, string, &localLength, flags, instruction->address);
 	localLength -= 1 /* For '\0' */;
 	string += localLength;
 	outLength += localLength;
