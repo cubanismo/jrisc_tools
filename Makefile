@@ -9,7 +9,7 @@
 # Adjust these when making new releases
 
 JDIS_MAJOR = 1
-JDIS_MINOR = 1
+JDIS_MINOR = 2
 JDIS_MICRO = 0
 
 # Compiler/linker flags
