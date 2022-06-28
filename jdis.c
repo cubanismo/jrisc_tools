@@ -53,8 +53,6 @@ main(int argc, char *argv[])
 	const char *fileName = NULL;
 	enum JRISC_CPU cpu = JRISC_gpu;
 	uint64_t fileOffset = 0;
-	static const uint32_t defaultGpuBase = 0xf03000;
-	static const uint32_t defaultDspBase = 0xf1b000;
 	uint32_t baseAddress = 0;
 	bool baseSpecified = false;
 	uint32_t stringFlags = 0;
@@ -148,7 +146,7 @@ main(int argc, char *argv[])
 	}
 
 	if (!baseSpecified) {
-		baseAddress = (cpu == JRISC_gpu) ? defaultGpuBase : defaultDspBase;
+		baseAddress = (cpu == JRISC_gpu) ? JRISC_GPU_RAM : JRISC_DSP_RAM;
 	}
 	
 	if (!fileName) {

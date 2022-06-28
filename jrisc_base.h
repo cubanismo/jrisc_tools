@@ -13,4 +13,7 @@ enum JRISC_Error {
 #undef JRISC_ERROR
 };
 
+#define JRISC_GPU_RAM 0xf03000
+#define JRISC_DSP_RAM 0xf1b000
+
 #endif /* JRISC_BASE_H_ */
