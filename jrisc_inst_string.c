@@ -59,13 +59,13 @@ static const char *jriscOpNameToString(enum JRISC_OpName opName)
 }
 
 /* Helper macro to build strings */
-#define ADD_STRING(...)													\
-	do {																\
-		int tmpLength = snprintf(string, stringLength, __VA_ARGS__);	\
-		if (string) string += tmpLength;								\
-		if (tmpLength >= stringLength) stringLength = 0;				\
-		else stringLength -= tmpLength;									\
-		outLength += tmpLength;											\
+#define ADD_STRING(...)																								 \
+	do {																																	\
+		int tmpLength = snprintf(string, stringLength, __VA_ARGS__);				\
+		if (string) string += tmpLength;																		\
+		if (tmpLength >= stringLength) stringLength = 0;										\
+		else stringLength -= tmpLength;																		 \
+		outLength += tmpLength;																						 \
 	} while (0)
 
 static inline uint8_t
@@ -77,9 +77,11 @@ jriscRegUnsignedValue(const struct JRISC_OpReg *reg)
 /* Returns true if the register field is something visible */
 static bool
 jriscRegToString(const struct JRISC_OpReg *reg,
-				 const char *baseIndirect,
-				 char *string,
-				 size_t *stringLengthInOut)
+								 const char *baseIndirect,
+								 char *string,
+								 size_t *stringLengthInOut,
+								 uint32_t flags,
+								 uint32_t address)
 {
 	size_t stringLength = string ? *stringLengthInOut : 0;
 	int outLength = 0;
@@ -103,7 +105,7 @@ jriscRegToString(const struct JRISC_OpReg *reg,
 		assert(!baseIndirect);
 		switch (reg->val.condition) {
 		case 0x0:	visible = false;	/* True/Always */	break;
-		case 0x1:	ADD_STRING("NE");	/* Not  Equal */	break;
+		case 0x1:	ADD_STRING("NE");	/* Not	Equal */	break;
 		case 0x2:	ADD_STRING("EQ");	/* Equal */			break;
 		case 0x4:	ADD_STRING("CC");	/* Carry Clear */	break;
 		case 0x5:	ADD_STRING("HI");	/* Higher */		break;
@@ -119,7 +121,7 @@ jriscRegToString(const struct JRISC_OpReg *reg,
 	case JRISC_uimmediate:
 		if (baseIndirect) {
 			ADD_STRING("(%s+%" PRIu8 ")", baseIndirect,
-					   jriscRegUnsignedValue(reg));
+								 jriscRegUnsignedValue(reg));
 		} else {
 			ADD_STRING("#%" PRIu8, jriscRegUnsignedValue(reg));
 		}
@@ -142,7 +144,11 @@ jriscRegToString(const struct JRISC_OpReg *reg,
 
 	case JRISC_pcoffset:
 		assert(!baseIndirect);
-		ADD_STRING("*%+" PRId8, (reg->val.simmediate + 1) * 2);
+		if (flags & JRISC_STRINGFLAG_ADDRESS) {
+			ADD_STRING("$%x",(reg->val.simmediate + 1) * 2 + address);
+		} else {
+			ADD_STRING("*%+" PRId8, (reg->val.simmediate + 1) * 2);
+		}
 		break;
 
 	case JRISC_flag:
@@ -161,9 +167,9 @@ jriscRegToString(const struct JRISC_OpReg *reg,
 
 void
 jriscInstructionToString(const struct JRISC_Instruction *instruction,
-						 uint32_t flags,
-						 char *string,
-						 size_t *stringLengthInOut)
+												 uint32_t flags,
+												 char *string,
+												 size_t *stringLengthInOut)
 {
 	const char *reg1BaseIndirect =
 		jriscOpNameToBaseRegString(instruction->opName);
@@ -197,8 +203,8 @@ jriscInstructionToString(const struct JRISC_Instruction *instruction,
 			(uint16_t)jriscRegToRaw(&instruction->regDst);
 
 		ADD_STRING("%s%02x%02x", opIndent,
-				   machineCode >> 8, (machineCode & 0xff));
-		opIndent = "  ";
+							 machineCode >> 8, (machineCode & 0xff));
+		opIndent = "	";
 
 		if (instruction->opName == JRISC_op_movei) {
 			uint16_t word;
@@ -209,12 +215,12 @@ jriscInstructionToString(const struct JRISC_Instruction *instruction,
 			word = jriscInstructionLongImmediateHigh(instruction);
 			ADD_STRING(" %02x%02x", word >> 8, (word & 0xff));
 		} else {
-			ADD_STRING("          ");
+			ADD_STRING("					");
 		}
 	}
 
 	if ((JRISC_unused == reg1->type) &&
-		(JRISC_unused == reg2->type)) {
+			(JRISC_unused == reg2->type)) {
 		/* If neither register is used, don't insert trailing whitespace */
 		opNameFmt = "%s%s";
 	}
@@ -226,9 +232,11 @@ jriscInstructionToString(const struct JRISC_Instruction *instruction,
 	} else {
 		localLength = stringLength;
 		regVisible = jriscRegToString(reg1,
-									  reg1BaseIndirect,
-									  string,
-									  &localLength);
+																	reg1BaseIndirect,
+																	string,
+																	&localLength,
+																	flags,
+																	instruction->address);
 		localLength -= 1 /* For '\0' */;
 		string += localLength;
 		outLength += localLength;
@@ -239,7 +247,7 @@ jriscInstructionToString(const struct JRISC_Instruction *instruction,
 	if (regVisible) ADD_STRING(", ");
 
 	localLength = stringLength;
-	jriscRegToString(reg2, reg2BaseIndirect, string, &localLength);
+	jriscRegToString(reg2, reg2BaseIndirect, string, &localLength, flags, instruction->address);
 	localLength -= 1 /* For '\0' */;
 	string += localLength;
 	outLength += localLength;
@@ -251,7 +259,7 @@ jriscInstructionToString(const struct JRISC_Instruction *instruction,
 
 enum JRISC_Error
 jriscInstructionPrint(const struct JRISC_Instruction *instruction,
-					  uint32_t flags)
+											uint32_t flags)
 {
 	static char tempBuf[32];
 	char *outBuf = NULL;
