@@ -170,8 +170,8 @@ jriscInstructionToString(const struct JRISC_Instruction *instruction,
 	const char *reg2BaseIndirect = NULL;
 	const struct JRISC_OpReg *reg1 = &instruction->regSrc;
 	const struct JRISC_OpReg *reg2 = &instruction->regDst;
-	const char *opIndent = "\t";
-	const char *regIndent = "\t";
+	const char *opIndent = flags ? "" : "\t";
+	const char *opNameFmt = "%s%-8s";
 	size_t stringLength = string ? *stringLengthInOut : 0;
 	size_t localLength;
 	int outLength = 0;
@@ -196,17 +196,30 @@ jriscInstructionToString(const struct JRISC_Instruction *instruction,
 			 JRISC_REGSRC_SHIFT) |
 			(uint16_t)jriscRegToRaw(&instruction->regDst);
 
-		ADD_STRING("%s%02x %02x", opIndent,
+		ADD_STRING("%s%02x%02x", opIndent,
 				   machineCode >> 8, (machineCode & 0xff));
+		opIndent = "  ";
+
+		if (instruction->opName == JRISC_op_movei) {
+			uint16_t word;
+
+			word = jriscInstructionLongImmediateLow(instruction);
+			ADD_STRING(" %02x%02x", word >> 8, (word & 0xff));
+
+			word = jriscInstructionLongImmediateHigh(instruction);
+			ADD_STRING(" %02x%02x", word >> 8, (word & 0xff));
+		} else {
+			ADD_STRING("          ");
+		}
 	}
 
 	if ((JRISC_unused == reg1->type) &&
 		(JRISC_unused == reg2->type)) {
-		/* If neither register is used, don't insert trailing tab */
-		regIndent = "";
+		/* If neither register is used, don't insert trailing whitespace */
+		opNameFmt = "%s%s";
 	}
 
-	ADD_STRING("\t%s%s", jriscOpNameToString(instruction->opName), regIndent);
+	ADD_STRING(opNameFmt, opIndent, jriscOpNameToString(instruction->opName));
 
 	if (instruction->opName == JRISC_op_movei) {
 		ADD_STRING("#$%x", instruction->longImmediate);
@@ -232,30 +245,6 @@ jriscInstructionToString(const struct JRISC_Instruction *instruction,
 	outLength += localLength;
 	if (localLength > stringLength) stringLength = 0;
 	else stringLength -= localLength;
-
-	if (instruction->opName == JRISC_op_movei) {
-		if (flags & JRISC_STRINGFLAG_MACHINE_CODE) {
-			uint16_t word;
-
-			ADD_STRING("\n");
-
-			if (flags & JRISC_STRINGFLAG_ADDRESS) {
-				ADD_STRING("%08x:", instruction->address + 2);
-			}
-
-			word = jriscInstructionLongImmediateLow(instruction);
-			ADD_STRING("%s%02x %02x", opIndent, word >> 8, (word & 0xff));
-
-			ADD_STRING("\n");
-
-			if (flags & JRISC_STRINGFLAG_ADDRESS) {
-				ADD_STRING("%08x:", instruction->address + 4);
-			}
-
-			word = jriscInstructionLongImmediateHigh(instruction);
-			ADD_STRING("%s%02x %02x", opIndent, word >> 8, (word & 0xff));
-		}
-	}
 
 	*stringLengthInOut = outLength + 1 /* For '\0' */;
 }
