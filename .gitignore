@@ -1,6 +1,7 @@
 /jdis
 /test/testmem
 /test/testmem.pass
+/python/build
 *.o
 *.a
 *~
