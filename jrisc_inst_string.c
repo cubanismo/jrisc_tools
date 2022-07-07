@@ -52,7 +52,8 @@ static const char *jriscOpNameToString(enum JRISC_OpName opName)
 	case JRISC_op_loadr15n:		/* Fall through */
 	case JRISC_op_loadr15r:
 		return "load";
-
+	case JRISC_op_movepc:
+		return "move";
 	default:
 		return jriscOpNameToStringTable[opName];
 	}
@@ -229,6 +230,10 @@ jriscInstructionToString(const struct JRISC_Instruction *instruction,
 
 	if (instruction->opName == JRISC_op_movei) {
 		ADD_STRING("#$%x", instruction->longImmediate);
+    } else if (instruction->opName == JRISC_op_movepc) {
+		ADD_STRING("PC,", instruction->longImmediate);
+		regVisible = 0;
+		reg2 = reg1;
 	} else {
 		localLength = stringLength;
 		regVisible = jriscRegToString(reg1,
