@@ -13,14 +13,14 @@ from distutils.core import setup, Extension
 jrisc = Extension('jrisc',
 				  define_macros = [
 					  ('JDIS_MAJOR', '1'),
-					  ('JDIS_MINOR', '2'),
+					  ('JDIS_MINOR', '3'),
 					  ('JDIS_MICRO', '0')],
 				  include_dirs = ['..'],
 				  sources = ['jrisc_pymodule.c'],
 				  extra_objects = ['../libjrisc.a'])
 
 setup(name = 'jrisc',
-	  version = '1.2.0',
+	  version = '1.3.0',
 	  description = 'Jaguar RISC tools',
 	  author = 'James Jones',
 	  author_email = 'atari@theinnocuous.com',
