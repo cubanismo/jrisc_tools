@@ -23,6 +23,7 @@ label:
 	moveq   #31, r31
 	moveq   #15, r31
 	moveq   #0, r28
+	move    pc, r3
 	rorq    #32, r0
 	rorq    #1, r0
 	shrq    #2, r0
